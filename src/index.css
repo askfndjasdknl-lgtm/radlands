@@ -1,0 +1,134 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Radlands Post-Apocalyptic Theme - Dark Mode Primary */
+    --background: 20 8% 8%;
+    --foreground: 30 5% 85%;
+
+    --card: 20 10% 12%;
+    --card-foreground: 30 5% 90%;
+
+    --popover: 20 12% 10%;
+    --popover-foreground: 30 5% 90%;
+
+    /* Wasteland Orange - primary action color */
+    --primary: 16 100% 60%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Steel Blue - secondary actions */
+    --secondary: 210 60% 55%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 20 8% 18%;
+    --muted-foreground: 30 5% 60%;
+
+    /* Radioactive Green - accent for special states */
+    --accent: 120 100% 60%;
+    --accent-foreground: 0 0% 10%;
+
+    /* Damage Red */
+    --destructive: 0 85% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 20 10% 22%;
+    --input: 20 10% 18%;
+    --ring: 16 100% 60%;
+
+    --radius: 0.75rem;
+
+    /* Custom Radlands colors */
+    --wasteland: 16 100% 60%;
+    --metal: 0 0% 26%;
+    --radioactive: 120 100% 60%;
+    --steel: 210 60% 55%;
+    --rust: 25 75% 47%;
+    --smoke: 0 0% 45%;
+
+    /* Gradients */
+    --gradient-wasteland: linear-gradient(135deg, hsl(16 100% 60%), hsl(25 75% 47%));
+    --gradient-metal: linear-gradient(180deg, hsl(0 0% 26%), hsl(0 0% 15%));
+    --gradient-radioactive: linear-gradient(135deg, hsl(120 100% 60%), hsl(150 100% 50%));
+
+    /* Shadows */
+    --shadow-wasteland: 0 4px 20px hsl(16 100% 60% / 0.3);
+    --shadow-radioactive: 0 0 20px hsl(120 100% 60% / 0.4);
+    --shadow-card: 0 2px 8px hsl(0 0% 0% / 0.5);
+
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+
+  /* Touch-friendly tap targets */
+  button, a, [role="button"] {
+    @apply min-h-[44px] min-w-[44px];
+  }
+}
+
+@layer utilities {
+  /* Gradient utilities */
+  .bg-gradient-wasteland {
+    background: var(--gradient-wasteland);
+  }
+
+  .bg-gradient-metal {
+    background: var(--gradient-metal);
+  }
+
+  .bg-gradient-radioactive {
+    background: var(--gradient-radioactive);
+  }
+
+  /* Shadow utilities */
+  .shadow-wasteland {
+    box-shadow: var(--shadow-wasteland);
+  }
+
+  .shadow-radioactive {
+    box-shadow: var(--shadow-radioactive);
+  }
+
+  .shadow-card-custom {
+    box-shadow: var(--shadow-card);
+  }
+
+  /* Animation utilities */
+  .transition-smooth {
+    transition: var(--transition-smooth);
+  }
+
+  .transition-bounce {
+    transition: var(--transition-bounce);
+  }
+
+  /* Glow effects */
+  .glow-wasteland {
+    box-shadow: 0 0 20px hsl(var(--wasteland) / 0.5);
+  }
+
+  .glow-radioactive {
+    box-shadow: 0 0 20px hsl(var(--radioactive) / 0.6);
+  }
+}
