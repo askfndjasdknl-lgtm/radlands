@@ -11,7 +11,13 @@ def health_check():
 
 @api_bp.route('/games', methods=['POST'])
 def create_game():
+    import random
+    
     data = request.json
+    
+    player1_camps = data.get('player1_camps', [])
+    player2_camps = data.get('player2_camps', [])
+    start_player = data.get('start_player', random.choice([1, 2]))
     
     game = Game(
         player1_name=data.get('player1_name', 'Player 1'),
@@ -20,12 +26,50 @@ def create_game():
     db.session.add(game)
     db.session.flush()
     
+    people_cards = Card.query.filter_by(card_type='people').all()
+    event_cards = Card.query.filter_by(card_type='event').all()
+    
+    deck_card_ids = [card.id for card in people_cards + event_cards]
+    
+    player1_deck = deck_card_ids.copy()
+    player2_deck = deck_card_ids.copy()
+    random.shuffle(player1_deck)
+    random.shuffle(player2_deck)
+    
+    player1_initial_draw = sum(camp.get('initial_draw', 0) for camp in player1_camps)
+    player2_initial_draw = sum(camp.get('initial_draw', 0) for camp in player2_camps)
+    
+    player1_hand = player1_deck[:player1_initial_draw]
+    player1_deck = player1_deck[player1_initial_draw:]
+    
+    player2_hand = player2_deck[:player2_initial_draw]
+    player2_deck = player2_deck[player2_initial_draw:]
+    
+    raiders_card = Card.query.filter_by(name='Raiders').first()
+    water_silo_card = Card.query.filter_by(name='Water Silo').first()
+    
+    if raiders_card:
+        player1_hand.append(raiders_card.id)
+        player2_hand.append(raiders_card.id)
+    
+    if water_silo_card:
+        player1_hand.append(water_silo_card.id)
+        player2_hand.append(water_silo_card.id)
+    
     board_state = BoardState(
         game_id=game.id,
-        player1_camps=[],
-        player2_camps=[],
+        player1_camps=player1_camps,
+        player2_camps=player2_camps,
         player1_columns=[[], [], []],
-        player2_columns=[[], [], []]
+        player2_columns=[[], [], []],
+        player1_deck=player1_deck,
+        player2_deck=player2_deck,
+        player1_hand=player1_hand,
+        player2_hand=player2_hand,
+        player1_discard=[],
+        player2_discard=[],
+        start_player=start_player,
+        current_player=start_player
     )
     db.session.add(board_state)
     db.session.commit()
@@ -34,7 +78,10 @@ def create_game():
         "id": game.id,
         "player1_name": game.player1_name,
         "player2_name": game.player2_name,
-        "status": game.status
+        "status": game.status,
+        "start_player": start_player,
+        "player1_hand_count": len(player1_hand),
+        "player2_hand_count": len(player2_hand)
     }), 201
 
 @api_bp.route('/games/<int:game_id>', methods=['GET'])
@@ -169,36 +216,22 @@ def get_cards():
         "water_cost": card.water_cost,
         "abilities": card.abilities,
         "traits": card.traits,
-        "junk_effect": card.junk_effect
+        "junk_effect": card.junk_effect,
+        "event_effect": card.event_effect,
+        "bomb_position": card.bomb_position,
+        "initial_draw": card.initial_draw,
+        "expansion": card.expansion
     } for card in cards]), 200
 
 @api_bp.route('/cards/seed', methods=['POST'])
-def seed_cards():
-    sample_cards = [
-        {
-            "name": "Punk",
-            "card_type": "person",
-            "water_cost": 0,
-            "abilities": [],
-            "traits": [],
-            "junk_effect": "Gain 1 water"
-        },
-        {
-            "name": "Raider",
-            "card_type": "person",
-            "water_cost": 2,
-            "abilities": ["Raid: Damage any camp"],
-            "traits": ["Raider"],
-            "junk_effect": "Damage any person"
-        }
-    ]
+def seed_cards_endpoint():
+    from backend.seeds import seed_cards
     
-    for card_data in sample_cards:
-        existing = Card.query.filter_by(name=card_data['name']).first()
-        if not existing:
-            card = Card(**card_data)
-            db.session.add(card)
+    result = seed_cards()
     
-    db.session.commit()
-    
-    return jsonify({"message": "Cards seeded successfully"}), 201
+    return jsonify({
+        "message": "Cards seeded successfully",
+        "added": result["added"],
+        "updated": result["updated"],
+        "total": result["total"]
+    }), 201

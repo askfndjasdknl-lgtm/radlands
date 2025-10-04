@@ -36,5 +36,12 @@ def create_app():
     
     with app.app_context():
         db.create_all()
+        
+        from backend.models import Card
+        from backend.seeds import seed_cards
+        
+        if Card.query.count() == 0:
+            seed_cards()
+            print("Database seeded with Radlands cards")
     
     return app

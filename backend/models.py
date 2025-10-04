@@ -30,6 +30,16 @@ class BoardState(db.Model):
     player1_columns = db.Column(JSON, default=list)
     player2_columns = db.Column(JSON, default=list)
     
+    player1_deck = db.Column(JSON, default=list)
+    player2_deck = db.Column(JSON, default=list)
+    
+    player1_hand = db.Column(JSON, default=list)
+    player2_hand = db.Column(JSON, default=list)
+    
+    player1_discard = db.Column(JSON, default=list)
+    player2_discard = db.Column(JSON, default=list)
+    
+    start_player = db.Column(db.Integer, default=1)
     current_player = db.Column(db.Integer, default=1)
     turn_number = db.Column(db.Integer, default=1)
 
@@ -61,5 +71,6 @@ class Card(db.Model):
     
     event_effect = db.Column(db.Text)
     bomb_position = db.Column(db.Integer)
+    initial_draw = db.Column(db.Integer)
     
     expansion = db.Column(db.String(50), default='base')
