@@ -1,0 +1,76 @@
+Roadmap para Desenvolvimento da Aplicação de Auxílio ao Jogo Radlands
+A aplicação será desenvolvida como dois projetos separados: um backend em Python com Flask (para gerenciar lógica de negócios, dados e APIs) e um frontend em JavaScript com React (para a interface do usuário, tornando-a responsiva e otimizada para mobile). Como a aplicação rodará em mobile, recomendo o uso de React Native como framework adicional para o frontend, permitindo uma experiência nativa em iOS e Android, enquanto mantém a compatibilidade com React. Para robustez e organização, adotaremos práticas como controle de versão (Git), testes unitários/integração (com pytest no backend e Jest no frontend), linting (Flake8/ESLint), documentação (Swagger para APIs, JSDoc para frontend), e segurança (validação de entradas, CORS, JWT para autenticação se necessário). O backend será uma API RESTful, e o frontend consumirá essa API via HTTP (Axios ou Fetch).
+O desenvolvimento será dividido em fases sequenciais, com milestones para integração. Assumindo um ciclo ágil, cada fase pode durar 1-2 semanas, dependendo do time. O foco é na escalabilidade: o backend pode persistir estados de jogo (ex.: sincronização multi-dispositivo), enquanto o frontend prioriza usabilidade touch-friendly.
+Roadmap do Backend (Projeto: radlands-backend)
+Este projeto será uma API em Flask, com banco de dados (SQLite para dev, PostgreSQL para prod usando SQLAlchemy). Frameworks adicionais: Flask-RESTful para APIs, Flask-SQLAlchemy para ORM, Flask-JWT-Extended para auth (se houver usuários), e Celery para tarefas assíncronas (ex.: notificações de eventos). Estrutura de pastas: /app (módulos), /tests, /docs, /migrations (Alembic para DB).
+Fase 1: Planejamento e Configuração (1 semana)
+
+Definir requisitos: Modelar entidades como Jogador, Fila de Eventos, Água, Colunas (camps/people), Cartas (base + expansão Cult of Chrome). Incluir trackers para eventos, água, estados ready/damaged.
+Configurar ambiente: Instalar Python 3.10+, criar virtualenv, instalar dependências (Flask, SQLAlchemy, etc.) via pip. Configurar Git e .gitignore.
+Estruturar projeto: Criar blueprint para rotas (ex.: /api/events, /api/cards). Configurar logging (logging module) e ambiente (dev/prod com dotenv).
+Milestone: Repositório Git inicializado, app Flask rodando localmente com rota de health check (/ping).
+
+Fase 2: Desenvolvimento de Modelos e Lógica Core (2 semanas)
+
+Implementar modelos DB: Classes para Card (com traits, abilities, junk effects), EventQueue, WaterTracker, BoardState (colunas, punks). Incluir FAQs e regras do rulebook como dados estáticos (JSON ou DB seed).
+Lógica de jogo: Funções para avançar eventos, calcular ready states, simular danos/proteção, gerenciar água (spend/reset). Incluir validações (ex.: max 2 people por coluna).
+APIs iniciais: POST/GET para criar jogo, atualizar queue de eventos (ex.: /events/advance), rastrear água (/water/spend). Incluir endpoints para setup (randomizar camps, calcular hand inicial).
+Segurança: Implementar CORS, validação de schemas (Marshmallow) para payloads JSON.
+Milestone: Banco de dados migrado, testes unitários para lógica core (cobertura >80% com pytest).
+
+Fase 3: Funcionalidades Avançadas e Integração (2 semanas)
+
+Adicionar features: Endpoints para card database (search por keyword), damage calculator, turn tracker (phases: events/replenish/actions). Incluir suporte a punks e raiders.
+Autenticação: JWT para sessões de jogo (se multi-usuário, ex.: compartilhar estado entre jogadores).
+Otimização: Cache (Redis) para consultas frequentes (ex.: card list), error handling global.
+Documentação: Swagger UI para APIs (/docs).
+Milestone: APIs testadas com Postman, integração mock com frontend.
+
+Fase 4: Testes, Segurança e Deploy (1 semana)
+
+Testes: Integração (testar fluxos completos como turno inteiro), performance (locust para load testing).
+Segurança: Scan de vulnerabilidades (bandit), rate limiting (Flask-Limiter).
+Deploy: Configurar Docker para containerização, deploy em Heroku/AWS com CI/CD (GitHub Actions).
+Milestone: Backend deployado, pronto para produção.
+
+Roadmap do Frontend (Projeto: radlands-frontend)
+Este projeto usará React Native (para mobile nativo) com Expo para setup rápido. Frameworks adicionais: Redux para state management (ex.: board state), Axios para API calls, React Navigation para telas, e Styled Components para UI temática (post-apocalíptica, inspirada no rulebook). Estrutura de pastas: /src (components, screens, redux), /assets (imagens de cartas), /tests. O app será offline-first (local storage com AsyncStorage), sincronizando com backend quando online.
+Fase 1: Planejamento e Configuração (1 semana)
+
+Definir UI/UX: Wireframes para telas (ex.: Home com setup, Board Tracker split-screen para 2 jogadores, Event Queue com drag-and-drop). Usar touch gestures (swipe para advance turn).
+Configurar ambiente: Instalar Node.js, criar app com Expo CLI, instalar dependências (React Native, Redux, etc.). Configurar Git.
+Estruturar projeto: Configurar navigation stack (telas: Setup, GameTracker, CardSearch, FAQ). Incluir temas (dark mode para vibe Radlands).
+Milestone: App rodando em emulador (Android/iOS), tela inicial com botão de novo jogo.
+
+Fase 2: Desenvolvimento de Componentes Core (2 semanas)
+
+Componentes UI: Grid para colunas (3x por jogador, slots dragáveis para people/camps), contadores touch para água (tap to spend), queue de eventos com animações (advance com swipe).
+Integração com backend: Chamadas API para fetch cards, update states. Usar Redux para gerenciar estado local (ex.: ready flags, damaged icons).
+Features iniciais: Event tracker (countdown visual, alerts via Vibration API), water tracker (reset on turn end), board state (highlight unprotected).
+Acessibilidade: Text-to-speech para leituras de cartas (React Native TTS), high-contrast mode.
+Milestone: Telas principais funcionais, testes unitários com Jest para componentes.
+
+Fase 3: Funcionalidades Avançadas e Integração (2 semanas)
+
+Adicionar features: Card database com search (autocomplete), damage calculator (simulação touch), setup assistant (random camps). Incluir logs de jogo e timers opcionais.
+Otimização mobile: Offline support (cache cards localmente), push notifications para event resolution (Expo Notifications).
+UI temática: Usar assets do rulebook (imagens de icons como damage/raid), animações (Lottie para bomb countdown).
+Integração full: Conectar todas telas ao backend, handle errors (toasts com React Native Toast).
+Milestone: App testado em dispositivos reais, sincronização com backend funcionando.
+
+Fase 4: Testes, Polimento e Deploy (1 semana)
+
+Testes: E2E com Detox/Appium, usabilidade (beta testing com jogadores de Radlands).
+Polimento: Responsividade para diferentes tamanhos de tela, internacionalização (pt-BR default).
+Deploy: Build com Expo EAS para App Store/Google Play, ou PWA fallback.
+Milestone: App publicado, documentação de uso (in-app tutorial).
+
+Considerações Gerais
+
+Integração entre Projetos: Após Fase 2 de cada, realizar merges semanais para testar API-frontend. Usar ambiente dev compartilhado.
+Ferramentas Compartilhadas: GitHub para repos, Jira/Trello para tasks, ESLint/Prettier para code style.
+Robustez: Incluir monitoring (Sentry para errors), backups DB, e atualizações para rulebook v2.0+.
+Tempo Total Estimado: 7-8 semanas, escalável com time.
+Custos: Gratuito para dev (open-source tools), ~R$50/mês para host (Heroku free tier inicial).
+
+Esse roadmap garante um projeto organizado, robusto e alinhado às necessidades de assistência ao jogo físico. Se precisar de ajustes ou detalhes em fases específicas, avise!
